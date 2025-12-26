@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: "Wave-Seed: Maintaining Productive Tension in LLM Outputs"
+message: "If you use this work, please cite it."
+authors:
+  - family-names: "du Mesnildot"
+    given-names: "Pons"
+year: 2025
+url: "https://github.com/<Mesnildot>/wave-seed"
