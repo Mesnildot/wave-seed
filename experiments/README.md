@@ -1,245 +1,121 @@
-# Wave-Seed  
-**Measuring Output Variability Under Fixed Prompt Conditions**
+# Experiments
+
+This folder documents the **protocols, data collection, cleaning steps, metrics, and interpretation limits** used in Wave-Seed.
+
+It intentionally preserves corrections and uncertainties. The goal is reproducibility, not narrative.
 
 ---
 
-## Overview
+## Scope (non-negotiable constraints)
 
-**Wave-Seed** is an exploratory experimental framework designed to measure **output variability** in large language models when the **explicit prompt is held constant**.
+All runs documented here are:
 
-The project investigates whether identical prompts, issued as isolated inferences, produce convergent or divergent outputs — and what this reveals about **implicit contextual sensitivity** in generative systems.
+- single-turn inference only
+- no conversational memory
+- no feedback loop
+- no training / fine-tuning
+- same explicit prompt per condition
 
-This repository prioritizes **methodological transparency**, **reproducibility**, and **negative results**.
-
----
-
-## What This Project Is
-
-- A **prompt-controlled experimental setup**
-- A collection of **raw and cleaned model outputs**
-- A simple, transparent **diversity / collapse metric**
-- A record of **failed, partial, and exploratory hypotheses**
+Any observed variability is therefore not explained by the explicit prompt alone.
 
 ---
 
-## What This Project Is NOT
+## Conditions
 
-- ❌ Not a benchmark  
-- ❌ Not a conversational or memory experiment  
-- ❌ Not a performance evaluation  
-- ❌ Not a claim about model cognition or intent  
+### Baseline / Control (Wave-Seed core)
 
-Each run consists of a **single, isolated inference**.  
-No feedback, no dialogue, no learning loop is involved.
+- identical Wave-Seed core prompt
+- independent inference runs
+- fresh context per run
+- no enforced time delay
 
----
-
-## Core Question
-
-> **Do identical prompts, issued as independent inferences, converge toward similar outputs — or do they remain diverse?**
-
-If diversity persists, the variability must originate from **implicit system-level or contextual factors**, not from the prompt itself.
+Purpose: establish a reference level of variability.
 
 ---
 
-## Experimental Conditions
+### Delay condition (Wave-Seed core + time separation)
 
-All experiments share the same **Wave-Seed core prompt**, with variations only in **external conditions**:
+- same prompt as baseline
+- explicit time delay between runs
+- fresh context per run
 
-- **Baseline / Control**  
-  Identical prompt, independent runs
+Purpose: test whether time separation alone affects convergence.
 
-- **Delay condition**  
-  Same prompt, time delay between runs
-
-- **B3 – Maintained contradiction**  
-  Prompt variant embedding an unresolved internal contradiction
-
-No conversational turns are used in any condition.
+Protocol: see `protocol_delay.md`.
 
 ---
 
-## Metrics
+### B3 — Maintained contradiction (prompt variant)
 
-### Collapse Rate (0 → 1)
+- prompt variant embedding an unresolved internal contradiction
+- no request to resolve the contradiction
+- no follow-up turns
 
-A simple metric estimating **output convergence**:
-
-- `0.0` → high diversity  
-- `1.0` → strong collapse / convergence  
-
-Implemented in:
-
-# Wave-Seed  
-**Measuring Output Variability Under Fixed Prompt Conditions**
+Purpose: test whether structural contradiction forces convergence/collapse.
 
 ---
 
-## Overview
+## Data files
 
-**Wave-Seed** is an exploratory experimental framework designed to measure **output variability** in large language models when the **explicit prompt is held constant**.
+Naming conventions:
 
-The project investigates whether identical prompts, issued as isolated inferences, produce convergent or divergent outputs — and what this reveals about **implicit contextual sensitivity** in generative systems.
+- `samples_*_raw.txt` = raw pasted outputs (may contain model-inserted separators)
+- `samples_*_clean.txt` = cleaned outputs (manual fix for counting + delimiting)
+- `Gemini_*_exports.txt` = conversation/export logs used for traceability (when available)
 
-This repository prioritizes **methodological transparency**, **reproducibility**, and **negative results**.
-
----
-
-## What This Project Is
-
-- A **prompt-controlled experimental setup**
-- A collection of **raw and cleaned model outputs**
-- A simple, transparent **diversity / collapse metric**
-- A record of **failed, partial, and exploratory hypotheses**
+Important correction:
+Some model outputs include `---` inside the generated text.
+This can falsely inflate sample counts if `---` is used as a separator.
+Cleaning is therefore required.
 
 ---
 
-## What This Project Is NOT
+## Metric used
 
-- ❌ Not a benchmark  
-- ❌ Not a conversational or memory experiment  
-- ❌ Not a performance evaluation  
-- ❌ Not a claim about model cognition or intent  
+**Collapse Rate (0 → 1)** estimates convergence:
 
-Each run consists of a **single, isolated inference**.  
-No feedback, no dialogue, no learning loop is involved.
+- `0.0` → high diversity
+- `1.0` → strong collapse / convergence
 
----
+Implementation: `../metrics/collapse_rate_eoo.py`
 
-## Core Question
-
-> **Do identical prompts, issued as independent inferences, converge toward similar outputs — or do they remain diverse?**
-
-If diversity persists, the variability must originate from **implicit system-level or contextual factors**, not from the prompt itself.
+Interpretation is intentionally conservative: the metric detects **relative changes**, not semantic equivalence.
 
 ---
 
-## Experimental Conditions
+## Current results (snapshot)
 
-All experiments share the same **Wave-Seed core prompt**, with variations only in **external conditions**:
+Across tested conditions:
 
-- **Baseline / Control**  
-  Identical prompt, independent runs
-
-- **Delay condition**  
-  Same prompt, time delay between runs
-
-- **B3 – Maintained contradiction**  
-  Prompt variant embedding an unresolved internal contradiction
-
-No conversational turns are used in any condition.
-
----
-
-## Metrics
-
-### Collapse Rate (0 → 1)
-
-A simple metric estimating **output convergence**:
-
-- `0.0` → high diversity  
-- `1.0` → strong collapse / convergence  
-
-Implemented in:metrics/collapse_rate_eoo.py
-
-Interpretation is intentionally conservative.
-
----
-
-## Key Observations (Current State)
-
-- Collapse remains **LOW** across all tested conditions
-- Time delay alone does **not** produce meaningful convergence
+- Collapse remains **LOW**
+- Delay alone does **not** induce strong convergence
 - Maintained contradiction does **not** force collapse
-- Variability persists despite fixed prompts
+- Variability persists under fixed explicit prompts
 
-👉 This falsifies the hypothesis that **prompt repetition alone** induces convergence.
-
----
-
-## What Is Actually Observed
-
-The data suggests sensitivity to **implicit context**, potentially including:
-
-- session or account state
-- internal initialization noise
-- system-level framing not exposed to the user
-
-These factors are **not directly observable**, but their effects are measurable.
+These are empirical observations only. No causal mechanism is claimed.
 
 ---
 
-## Repository Structure
+## What this does NOT show
 
-wave-seed/
-├── README.md
-├── LICENSE
-├── analysis/
-│ └── RESULTS_SUMMARY.md
-├── experiments/
-│ ├── README.md
-│ ├── protocol_delay.md
-│ ├── samples_raw.txt
-│ ├── samplesclean.txt
-│ └── Gemini*_exports.txt
-├── metrics/
-│ └── collapse_rate_eoo.py
-├── prompts/
-│ ├── wave_seed_core.md
-│ ├── wave_seed_B3_contradiction.md
-│ └── variants.md
-
+- no evidence of conversational influence
+- no evidence of internal regulation
+- no evidence of prompt repetition forcing convergence
+- no evidence of model intent or cognition
 
 ---
 
-## Methodological Position
+## Limitations
 
-This project embraces:
-
-- incomplete results
-- null effects
-- hypothesis revision
-
-**Not concluding** is considered a valid and valuable outcome.
+- internal model state is not observable
+- sampling parameters are not controllable by the user
+- small samples by design
+- single model tested so far (Gemini)
 
 ---
 
-## Current Limitations
+## Link to project-level scope
 
-- No control over internal model state
-- No access to system-level randomness parameters
-- Small sample sizes (by design)
+Project overview and boundaries live in:
 
----
-
-## Next Possible Directions
-
-- Controlled session reuse vs fresh sessions
-- Minimal two-turn interaction tests
-- Cross-model comparison under identical protocol
-
-These are **not yet implemented**.
-
----
-
-## License
-
-Apache 2.0 — see `LICENSE`.
-
----
-
-## Citation
-
-If you reference this work: Wave-Seed Project.
-Measuring Output Variability Under Fixed Prompt Conditions.
-GitHub repository.
-
-A `CITATION.cff` file is provided.
-
----
-
-### Final note
-
-This repository documents **what happened**, not what we hoped would happen.
-
-That is the point.
+👉 `../README.md`
